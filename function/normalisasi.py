@@ -1,0 +1,48 @@
+# function/normalization.py
+norm = {
+    ' tak ': ' tidak ',
+    ' emg ': ' emang ',
+    ' yg ': ' yang ',
+    ' emina ': ' emina ',
+    ' bgt ': ' banget ',
+    ' sgt ': ' sangat ',
+    ' dgn ': ' dengan ',
+    ' dr ': ' dari ',
+    ' km ': ' kamu ',
+    ' jd ': ' jadi ',
+    ' g ': ' gak ',
+    ' ga ': ' gak ',
+    ' gk ': ' gak ',
+    ' tdk ': ' tidak ',
+    ' ap ': ' apa ',
+    ' enggk ': ' enggak ',
+    ' lg ': ' lagi ',
+    ' sdh ': ' sudah ',
+    ' aq ': ' aku ',
+    ' y ': ' iya ',
+    ' jg ': ' juga ',
+    ' kmrn ': ' kemarin ',
+    ' brp ': ' berapa ',
+    ' tq ': ' makasih ',
+    ' thx ': ' makasih ',
+    ' jln ': ' jalan ',
+    ' gmn ': ' bagaimana ',
+    ' sm ': ' sama ',
+    ' skrg ': ' sekarang ',
+    ' slalu ': ' selalu ',
+    ' drpd ': ' daripada ',
+    ' dpt ': ' dapat ',
+    ' bgi ': ' bagi ',
+    ' dlm ': ' dalam ',
+    ' bkn ': ' bukan ',
+    ' tlg ': ' tolong ',
+    ' trus ': ' terus ',
+    ' blm ': ' belum ',
+    ' drmh ': ' rumah ',
+    ' mlm ': ' malam ',
+}
+
+def normalize_text(text, abbreviations):
+    for word, full_form in abbreviations.items():
+        text = text.replace(word, full_form)
+    return text
