@@ -3,6 +3,8 @@ from flask_cors import CORS
 import pandas as pd
 from function.text_cleaner import clear_twitter_text
 from function.normalisasi import normalize_text, norm
+from function.stopwords import stopword
+from function.stemming import stemming
 
 app = Flask(__name__)
 cors = CORS(app, origins='*')
@@ -25,13 +27,51 @@ def clean_text():
 
 #preprocessing
 @app.route("/preprocessing-normalisasi")
-def preprocessing():
+def preprocessingNormalisasi():
     df = pd.read_csv('./dataset/eminatest.csv')
     df = df.drop_duplicates(subset=["full_text"])
     df= df.dropna(subset=["full_text"])
     df['full_text'] = df['full_text'].apply(clear_twitter_text)
     df['full_text'] = df['full_text'].str.lower()
     df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
+    return df.to_json(orient='records')
+
+@app.route("/preprocessing-stopwords")
+def preprocessingStopwords():
+    df = pd.read_csv('./dataset/eminatest.csv')
+    df = df.drop_duplicates(subset=["full_text"])
+    df= df.dropna(subset=["full_text"])
+    df['full_text'] = df['full_text'].apply(clear_twitter_text)
+    df['full_text'] = df['full_text'].str.lower()
+    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
+    df['full_text'] = df['full_text'].apply(stopword)
+    
+    return df.to_json(orient='records')
+
+@app.route("/preprocessing-tokenized")
+def preprocessingTokenized():
+    df = pd.read_csv('./dataset/eminatest.csv')
+    df = df.drop_duplicates(subset=["full_text"])
+    df= df.dropna(subset=["full_text"])
+    df['full_text'] = df['full_text'].apply(clear_twitter_text)
+    df['full_text'] = df['full_text'].str.lower()
+    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
+    df['full_text'] = df['full_text'].apply(stopword)
+    df['full_text'] = df['full_text'].apply(lambda x:x.split())
+    return df.to_json(orient='records')
+
+@app.route("/preprocessing-stemming")
+def preprocessingStemming():
+    df = pd.read_csv('./dataset/eminatest.csv')
+    df = df.head(50)
+    df = df.drop_duplicates(subset=["full_text"])
+    df= df.dropna(subset=["full_text"])
+    df['full_text'] = df['full_text'].apply(clear_twitter_text)
+    df['full_text'] = df['full_text'].str.lower()
+    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
+    df['full_text'] = df['full_text'].apply(stopword)
+    df['full_text'] = df['full_text'].apply(lambda x:x.split())
+    df['full_text'] = df['full_text'].apply(stemming)
     return df.to_json(orient='records')
 
 
