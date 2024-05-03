@@ -1,6 +1,11 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 import pandas as pd
+from textblob import TextBlob
+import nltk
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
+import preprocessor as p
 from function.text_cleaner import clear_twitter_text
 from function.normalisasi import normalize_text, norm
 from function.stopwords import stopword
@@ -61,19 +66,6 @@ def preprocessingTokenized():
     df['full_text'] = df['full_text'].apply(lambda x:x.split())
     return df.to_json(orient='records')
 
-@app.route("/preprocessing-stemming")
-def preprocessingStemming():
-    df = pd.read_csv('./dataset/eminatest.csv')
-    df = df.head(50)
-    df = df.drop_duplicates(subset=["full_text"])
-    df= df.dropna(subset=["full_text"])
-    df['full_text'] = df['full_text'].apply(clear_twitter_text)
-    df['full_text'] = df['full_text'].str.lower()
-    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
-    df['full_text'] = df['full_text'].apply(stopword)
-    df['full_text'] = df['full_text'].apply(lambda x:x.split())
-    df['full_text'] = df['full_text'].apply(stemming)
-    return df.to_json(orient='records')
 
 @app.route("/preprocessing-stemmingcsv")
 def preprocessingStemmingCsv():
@@ -88,9 +80,9 @@ def preprocessingStemmingCsv():
     df['full_text'] = df['full_text'].apply(stemming)
     return df.to_csv('./dataset/eminacleaned.csv', index=False)
 
-@app.route("/preprocessing-translate")
-def preprocessingTranslate():
-    df = pd.read_csv('./dataset/eminacleantranslate.csv')
+@app.route("/preprocessing-stemming")
+def preprocessingStemming():
+    df = pd.read_csv('./dataset/eminacleaned.csv')
     df = df.drop_duplicates(subset=["full_text"])
     df= df.dropna(subset=["full_text"])
     return df.to_json(orient='records')
@@ -102,6 +94,62 @@ def preprocessingTranslateCsv():
     df= df.dropna(subset=["full_text"])
     df['tweet_english'] = df['full_text'].apply(convert_eng)
     return df.to_csv('./dataset/eminacleantranslate.csv', index=False)
+
+@app.route("/preprocessing-translate")
+def preprocessingTranslate():
+    df = pd.read_csv('./dataset/eminacleantranslate.csv')
+    df = df.drop_duplicates(subset=["full_text"])
+    df= df.dropna(subset=["full_text"])
+    return df.to_json(orient='records')
+
+@app.route("/labeling-textblob")
+def labelingTextblob():
+    # jangan lupa download nltk, uncomment code dibawah
+    # nltk.download('punkt')
+    df = pd.read_csv('./dataset/eminacleantranslate.csv')
+    df = df.drop_duplicates(subset=["full_text"])
+    df = df.dropna(subset=["full_text"])
+    data_tweet = list(df['tweet_english'])
+
+    polaritas = 0
+    status = []
+    total_suka = total_tidaksuka = total_netral = total = 0
+
+    for i, tweet in enumerate(data_tweet):
+        analysis = TextBlob(tweet)
+        polaritas += analysis.polarity
+
+        if analysis.sentiment.polarity > 0.0:
+            total_suka += 1
+            status.append('Suka')
+        elif analysis.sentiment.polarity == 0.0:
+            total_netral += 1
+            status.append('Netral')
+        else:
+            total_tidaksuka += 1
+            status.append('Tidak_suka')
+
+        total += 1
+
+    result = [{
+        'suka': total_suka,
+        'netral': total_netral,
+        'tidaksuka': total_tidaksuka,
+        'totaldata': total
+    }]
+
+    df['klasifikasi_textblob'] = status
+
+    df_json = df.to_json(orient='records')
+
+    # Menggabungkan DataFrame JSON dan result ke dalam satu dictionary
+    response_data = {
+        'df': df_json,
+        'result': result
+    }
+
+    return (response_data)
+
 
 
 if __name__ == "__main__":
