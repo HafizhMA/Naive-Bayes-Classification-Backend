@@ -5,6 +5,7 @@ from function.text_cleaner import clear_twitter_text
 from function.normalisasi import normalize_text, norm
 from function.stopwords import stopword
 from function.stemming import stemming
+from function.translate import convert_eng
 
 app = Flask(__name__)
 cors = CORS(app, origins='*')
@@ -73,6 +74,34 @@ def preprocessingStemming():
     df['full_text'] = df['full_text'].apply(lambda x:x.split())
     df['full_text'] = df['full_text'].apply(stemming)
     return df.to_json(orient='records')
+
+@app.route("/preprocessing-stemmingcsv")
+def preprocessingStemmingCsv():
+    df = pd.read_csv('./dataset/eminatest.csv')
+    df = df.drop_duplicates(subset=["full_text"])
+    df= df.dropna(subset=["full_text"])
+    df['full_text'] = df['full_text'].apply(clear_twitter_text)
+    df['full_text'] = df['full_text'].str.lower()
+    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
+    df['full_text'] = df['full_text'].apply(stopword)
+    df['full_text'] = df['full_text'].apply(lambda x:x.split())
+    df['full_text'] = df['full_text'].apply(stemming)
+    return df.to_csv('./dataset/eminacleaned.csv', index=False)
+
+@app.route("/preprocessing-translate")
+def preprocessingTranslate():
+    df = pd.read_csv('./dataset/eminacleantranslate.csv')
+    df = df.drop_duplicates(subset=["full_text"])
+    df= df.dropna(subset=["full_text"])
+    return df.to_json(orient='records')
+
+@app.route("/preprocessing-translatecsv")
+def preprocessingTranslateCsv():
+    df = pd.read_csv('./dataset/eminacleaned.csv')
+    df = df.drop_duplicates(subset=["full_text"])
+    df= df.dropna(subset=["full_text"])
+    df['tweet_english'] = df['full_text'].apply(convert_eng)
+    return df.to_csv('./dataset/eminacleantranslate.csv', index=False)
 
 
 if __name__ == "__main__":
