@@ -11,10 +11,27 @@ from function.normalisasi import normalize_text, norm
 from function.stopwords import stopword
 from function.stemming import stemming
 from function.translate import convert_eng
+from flask_sqlalchemy import SQLAlchemy
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'analisisemosi'
+mysql = MySQL(app)
 cors = CORS(app, origins='*')
+
+
+
 #request
+@app.route('/')
+def index():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM user")
+    data = cur.fetchall()
+    cur.close()
+    return str(data)
 #showing data
 @app.route("/get-data")
 def get_data():
@@ -69,7 +86,7 @@ def preprocessingTokenized():
 
 @app.route("/preprocessing-stemmingcsv")
 def preprocessingStemmingCsv():
-    df = pd.read_csv('./dataset/eminatest.csv')
+    df = pd.read_csv('./dataset/palestina.csv')
     df = df.drop_duplicates(subset=["full_text"])
     df= df.dropna(subset=["full_text"])
     df['full_text'] = df['full_text'].apply(clear_twitter_text)
@@ -78,7 +95,7 @@ def preprocessingStemmingCsv():
     df['full_text'] = df['full_text'].apply(stopword)
     df['full_text'] = df['full_text'].apply(lambda x:x.split())
     df['full_text'] = df['full_text'].apply(stemming)
-    return df.to_csv('./dataset/eminacleaned.csv', index=False)
+    return df.to_csv('./dataset/palestinacleaned.csv', index=False)
 
 @app.route("/preprocessing-stemming")
 def preprocessingStemming():
