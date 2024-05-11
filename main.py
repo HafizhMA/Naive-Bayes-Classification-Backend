@@ -15,23 +15,104 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mysqldb import MySQL
 
 app = Flask(__name__)
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'analisisemosi'
-mysql = MySQL(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/analisisemosi'
+db = SQLAlchemy(app)
 cors = CORS(app, origins='*')
 
 
+# init Model
+class User(db.Model):
+    __tablename__ = 'user' 
+    id = db.Column(db.Integer, primary_key=True)
+    nama = db.Column(db.String(100), nullable=False)
 
-#request
+    def __repr__(self):
+        return '<User %r>' % self.nama
+    
+class Palestina(db.Model):
+    __tablename__ = 'palestina'
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id_str = db.Column(db.String(50))
+    created_at = db.Column(db.String(100))
+    favorite_count = db.Column(db.Integer)
+    full_text = db.Column(db.String(500))
+    id_str = db.Column(db.String(50))
+    image_url = db.Column(db.String(200))
+    in_reply_to_screen_name = db.Column(db.String(100))
+    lang = db.Column(db.String(10))
+    location = db.Column(db.String(100))
+    quote_count = db.Column(db.Integer)
+    reply_count = db.Column(db.Integer)
+    retweet_count = db.Column(db.Integer)
+    tweet_url = db.Column(db.String(200))
+    user_id_str = db.Column(db.String(50))
+    username = db.Column(db.String(100))
+
+    def __repr__(self):
+        return '<Palestina %r>' % self.full_text
+
+
+# Create and insert table
+@app.route("/create-palestina-table")
+def create_palestina_table():
+    db.create_all()
+    df = pd.read_csv('./dataset/palestina.csv').drop_duplicates(subset=['full_text']).dropna(subset=['full_text'])
+    df = df.where(pd.notnull(df), None)
+    for index, row in df.iterrows():
+        new_entry = Palestina(conversation_id_str=row['conversation_id_str'],
+                              created_at=row['created_at'],
+                              favorite_count=row['favorite_count'],
+                              full_text=row['full_text'],
+                              id_str=row['id_str'],
+                              image_url=row['image_url'],
+                              in_reply_to_screen_name=row['in_reply_to_screen_name'],
+                              lang=row['lang'],
+                              location=row['location'],
+                              quote_count=row['quote_count'],
+                              reply_count=row['reply_count'],
+                              retweet_count=row['retweet_count'],
+                              tweet_url=row['tweet_url'],
+                              user_id_str=row['user_id_str'],
+                              username=row['username'])
+        db.session.add(new_entry)
+    db.session.commit()
+    return "Tabel Palestina berhasil dibuat dan diisi dengan data."
+
+
+# get all data from table
+@app.route("/get-all-palestina-data")
+def get_all_palestina_data():
+    all_data = Palestina.query.all()
+    data_list = []
+    for data in all_data:
+        data_dict = {
+            'id': data.id,
+            'conversation_id_str': data.conversation_id_str,
+            'created_at': data.created_at,
+            'favorite_count': data.favorite_count,
+            'full_text': data.full_text,
+            'id_str': data.id_str,
+            'image_url': data.image_url,
+            'in_reply_to_screen_name': data.in_reply_to_screen_name,
+            'lang': data.lang,
+            'location': data.location,
+            'quote_count': data.quote_count,
+            'reply_count': data.reply_count,
+            'retweet_count': data.retweet_count,
+            'tweet_url': data.tweet_url,
+            'user_id_str': data.user_id_str,
+            'username': data.username
+        }
+        data_list.append(data_dict)
+    return jsonify(data_list)
+
 @app.route('/')
 def index():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM user")
-    data = cur.fetchall()
-    cur.close()
-    return str(data)
+    users = User.query.all()
+    user_data = [{'id': user.id, 'nama': user.nama} for user in users]
+    return jsonify(user_data)
+
+
 #showing data
 @app.route("/get-data")
 def get_data():
