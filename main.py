@@ -11,13 +11,19 @@ from function.normalisasi import normalize_text, norm
 from function.stopwords import stopword
 from function.stemming import stemming
 from function.translate import convert_eng
-from function.obj_converter import call_palestina_obj
-from models.model import db, User, Palestina
+from function.obj_converter import call_palestina_obj, call_palestinacleaned_obj
+from models.model import db, User, Palestina, PalestinaCleaned
 
 app = Flask(__name__)
 cors = CORS(app, origins='*')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/analisisemosi'
 db.init_app(app)
+
+
+# test connect flask
+@app.route("/")
+def home():
+    return 'connect ke flask berhasil'
 
 
 # Create and insert table
@@ -70,74 +76,85 @@ def clean_text():
 # preprocessing
 @app.route("/preprocessing-normalisasi")
 def preprocessingNormalisasi():
-    df = pd.read_csv('./dataset/eminatest.csv')
-    df = df.drop_duplicates(subset=["full_text"])
-    df= df.dropna(subset=["full_text"])
-    df['full_text'] = df['full_text'].apply(clear_twitter_text)
-    df['full_text'] = df['full_text'].str.lower()
-    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
-    return df.to_json(orient='records')
+    # Get data dari function.obj_converter.py
+    data_list = call_palestina_obj()
+
+    # Clean 'full_text' 
+    for data in data_list:
+        data['full_text'] = clear_twitter_text(data['full_text'])
+        data['full_text'] = data['full_text'].lower()
+        data['full_text'] = normalize_text(data['full_text'], norm)
+    return jsonify(data_list)
 
 @app.route("/preprocessing-stopwords")
 def preprocessingStopwords():
-    df = pd.read_csv('./dataset/eminatest.csv')
-    df = df.drop_duplicates(subset=["full_text"])
-    df= df.dropna(subset=["full_text"])
-    df['full_text'] = df['full_text'].apply(clear_twitter_text)
-    df['full_text'] = df['full_text'].str.lower()
-    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
-    df['full_text'] = df['full_text'].apply(stopword)
-    
-    return df.to_json(orient='records')
+    # Get data dari function.obj_converter.py
+    data_list = call_palestina_obj()
+
+    # Clean 'full_text' 
+    for data in data_list:
+        data['full_text'] = clear_twitter_text(data['full_text'])
+        data['full_text'] = data['full_text'].lower()
+        data['full_text'] = normalize_text(data['full_text'], norm)
+        data['full_text'] = stopword(data['full_text'])
+    return jsonify(data_list)
 
 @app.route("/preprocessing-tokenized")
 def preprocessingTokenized():
-    df = pd.read_csv('./dataset/eminatest.csv')
-    df = df.drop_duplicates(subset=["full_text"])
-    df= df.dropna(subset=["full_text"])
-    df['full_text'] = df['full_text'].apply(clear_twitter_text)
-    df['full_text'] = df['full_text'].str.lower()
-    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
-    df['full_text'] = df['full_text'].apply(stopword)
-    df['full_text'] = df['full_text'].apply(lambda x:x.split())
-    return df.to_json(orient='records')
+    # Get data dari function.obj_converter.py
+    data_list = call_palestina_obj()
+
+    # Clean 'full_text' 
+    for data in data_list:
+        data['full_text'] = clear_twitter_text(data['full_text'])
+        data['full_text'] = data['full_text'].lower()
+        data['full_text'] = normalize_text(data['full_text'], norm)
+        data['full_text'] = stopword(data['full_text'])
+        data['full_text'] = data['full_text'].split()
+    return jsonify(data_list)
 
 
-@app.route("/preprocessing-stemmingcsv")
-def preprocessingStemmingCsv():
-    df = pd.read_csv('./dataset/palestina.csv')
-    df = df.drop_duplicates(subset=["full_text"])
-    df= df.dropna(subset=["full_text"])
-    df['full_text'] = df['full_text'].apply(clear_twitter_text)
-    df['full_text'] = df['full_text'].str.lower()
-    df['full_text'] = df['full_text'].apply(lambda x: normalize_text(x, norm))
-    df['full_text'] = df['full_text'].apply(stopword)
-    df['full_text'] = df['full_text'].apply(lambda x:x.split())
-    df['full_text'] = df['full_text'].apply(stemming)
-    return df.to_csv('./dataset/palestinacleaned.csv', index=False)
+@app.route("/preprocessing-stemming-table")
+def preprocessingStemmingTable():
+    db.create_all()
+    # Assuming call_palestina_obj() fetches data as a list of dictionaries
+    data_list = call_palestina_obj()
+
+    # Clean 'full_text' 
+    for data in data_list:
+        data['full_text'] = clear_twitter_text(data['full_text'])
+        data['full_text'] = data['full_text'].lower()
+        data['full_text'] = normalize_text(data['full_text'], norm)
+        data['full_text'] = stopword(data['full_text'])
+        data['full_text'] = data['full_text'].split()
+        data['full_text'] = stemming(data['full_text'])
+
+        new_entry = PalestinaCleaned(conversation_id_str=data['conversation_id_str'],
+                              created_at=data['created_at'],
+                              favorite_count=data['favorite_count'],
+                              full_text=data['full_text'],
+                              id_str=data['id_str'],
+                              image_url=data['image_url'],
+                              in_reply_to_screen_name=data['in_reply_to_screen_name'],
+                              lang=data['lang'],
+                              location=data['location'],
+                              quote_count=data['quote_count'],
+                              reply_count=data['reply_count'],
+                              retweet_count=data['retweet_count'],
+                              tweet_url=data['tweet_url'],
+                              user_id_str=data['user_id_str'],
+                              username=data['username'])
+        db.session.add(new_entry)
+    db.session.commit()
+    return "Tabel Palestinacleaned berhasil dibuat dan diisi dengan data."
 
 @app.route("/preprocessing-stemming")
 def preprocessingStemming():
-    df = pd.read_csv('./dataset/eminacleaned.csv')
-    df = df.drop_duplicates(subset=["full_text"])
-    df= df.dropna(subset=["full_text"])
-    return df.to_json(orient='records')
+    data = call_palestinacleaned_obj()
+    return jsonify(data)
 
-@app.route("/preprocessing-translatecsv")
-def preprocessingTranslateCsv():
-    df = pd.read_csv('./dataset/eminacleaned.csv')
-    df = df.drop_duplicates(subset=["full_text"])
-    df= df.dropna(subset=["full_text"])
-    df['tweet_english'] = df['full_text'].apply(convert_eng)
-    return df.to_csv('./dataset/eminacleantranslate.csv', index=False)
 
-@app.route("/preprocessing-translate")
-def preprocessingTranslate():
-    df = pd.read_csv('./dataset/eminacleantranslate.csv')
-    df = df.drop_duplicates(subset=["full_text"])
-    df= df.dropna(subset=["full_text"])
-    return df.to_json(orient='records')
-
+# labeling
 @app.route("/labeling-textblob")
 def labelingTextblob():
     # jangan lupa download nltk, uncomment code dibawah
