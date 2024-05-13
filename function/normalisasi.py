@@ -1,6 +1,8 @@
 # function/normalization.py
 norm = {
     ' tak ': ' tidak ',
+    ' sudha ': ' sudah ',
+    ' ad ': ' ada ',
     ' emg ': ' emang ',
     ' yg ': ' yang ',
     ' emina ': ' emina ',
