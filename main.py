@@ -7,6 +7,8 @@ import nltk
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 import preprocessor as p
+from dotenv import load_dotenv
+import os
 from function.text_cleaner import clear_twitter_text
 from function.normalisasi import normalize_text, norm
 from function.stopwords import stopword
@@ -16,9 +18,10 @@ from function.categorize_trainingdata import categorize_text
 from function.obj_converter import call_palestina_obj, call_palestinacleaned_obj, call_trainingdata_obj
 from models.model import db, User, Palestina, PalestinaCleaned, PalestinaTrainingData
 
+load_dotenv()
 app = Flask(__name__)
 cors = CORS(app, origins='*')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/analisisemosi'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URI")
 db.init_app(app)
 
 
