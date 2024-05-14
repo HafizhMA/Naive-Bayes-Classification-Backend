@@ -2,6 +2,11 @@
 norm = {
     ' tak ': ' tidak ',
     ' sudha ': ' sudah ',
+    ' n ': ' dan ',
+    ' jgn ': ' jangan ',
+    ' kmu ': ' kamu ',
+    ' smga ': ' semoga ',
+    ' jk ': ' jika ',
     ' ad ': ' ada ',
     ' emg ': ' emang ',
     ' yg ': ' yang ',
