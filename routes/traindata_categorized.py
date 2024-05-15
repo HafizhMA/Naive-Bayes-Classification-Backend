@@ -50,6 +50,6 @@ def get_kategori():
     # Ubah hasil ke format yang bisa dijadikan JSON
     kategori_json = [{"kategori": kategori, "jumlah": jumlah} for kategori, jumlah in kategori_counter.items()]
     # Membuat dictionary yang berisi data asli dan kategori_json
-    total = {"data": data, "kategori": kategori_json}
+    total = {"datas": data, "categories": kategori_json}
     
     return jsonify(total)
