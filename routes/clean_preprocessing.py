@@ -82,7 +82,7 @@ def preprocessingStemmingTable():
     db.session.commit()
     return "Tabel Palestinacleaned berhasil dibuat dan diisi dengan data."
 
-@clean_preprocessing.route("/get-preprocessing-stemming")
+@clean_preprocessing.route("/get-datatesting")
 def preprocessingStemming():
     data = call_palestinacleaned_obj()
     return jsonify(data)
