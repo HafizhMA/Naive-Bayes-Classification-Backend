@@ -1,104 +1,111 @@
-from models.model import Palestina, PalestinaCleaned, PalestinaTrainingData, LabeledPalestinaData
+from sqlalchemy import create_engine, text
+import os
 
-# get semua data di tabel model dan mereturn array berisi object
-def call_palestina_obj():
-    all_data = Palestina.query.all()
-    data_list = []
-    for data in all_data:
-        data_dict = {
-            'id': data.id,
-            'conversation_id_str': data.conversation_id_str,
-            'created_at': data.created_at,
-            'favorite_count': data.favorite_count,
-            'full_text': data.full_text,
-            'id_str': data.id_str,
-            'image_url': data.image_url,
-            'in_reply_to_screen_name': data.in_reply_to_screen_name,
-            'lang': data.lang,
-            'location': data.location,
-            'quote_count': data.quote_count,
-            'reply_count': data.reply_count,
-            'retweet_count': data.retweet_count,
-            'tweet_url': data.tweet_url,
-            'user_id_str': data.user_id_str,
-            'username': data.username
-        }
-        data_list.append(data_dict)
+# Get database URI from environment variable
+engine = create_engine(os.getenv("DATABASE_URI"))
+
+def call_dataset_obj():
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT * FROM Dataset"))
+        data_list = []
+        for row in result:
+            data_dict = {
+                'id': row[0],
+                'conversation_id_str': row[1],
+                'created_at': row[2],
+                'favorite_count': row[3],
+                'full_text': row[4],
+                'id_str': row[5],
+                'image_url': row[6],
+                'in_reply_to_screen_name': row[7],
+                'lang': row[8],
+                'location': row[9],
+                'quote_count': row[10],
+                'reply_count': row[11],
+                'retweet_count': row[12],
+                'tweet_url': row[13],
+                'user_id_str': row[14],
+                'username': row[15]
+            }
+            data_list.append(data_dict)
     return data_list
 
-def call_palestinacleaned_obj():
-    all_data = PalestinaCleaned.query.all()
-    data_list = []
-    for data in all_data:
-        data_dict = {
-            'id': data.id,
-            'conversation_id_str': data.conversation_id_str,
-            'created_at': data.created_at,
-            'favorite_count': data.favorite_count,
-            'full_text': data.full_text,
-            'id_str': data.id_str,
-            'image_url': data.image_url,
-            'in_reply_to_screen_name': data.in_reply_to_screen_name,
-            'lang': data.lang,
-            'location': data.location,
-            'quote_count': data.quote_count,
-            'reply_count': data.reply_count,
-            'retweet_count': data.retweet_count,
-            'tweet_url': data.tweet_url,
-            'user_id_str': data.user_id_str,
-            'username': data.username
-        }
-        data_list.append(data_dict)
+def call_DatasetCleaned_obj():
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT * FROM DatasetCleaned"))
+        data_list = []
+        for row in result:
+            data_dict = {
+                'id': row[0],
+                'conversation_id_str': row[1],
+                'created_at': row[2],
+                'favorite_count': row[3],
+                'full_text': row[4],
+                'id_str': row[5],
+                'image_url': row[6],
+                'in_reply_to_screen_name': row[7],
+                'lang': row[8],
+                'location': row[9],
+                'quote_count': row[10],
+                'reply_count': row[11],
+                'retweet_count': row[12],
+                'tweet_url': row[13],
+                'user_id_str': row[14],
+                'username': row[15]
+            }
+            data_list.append(data_dict)
     return data_list
 
 def call_trainingdata_obj():
-    all_data = PalestinaTrainingData.query.all()
-    data_list = []
-    for data in all_data:
-        data_dict = {
-            'id': data.id,
-            'conversation_id_str': data.conversation_id_str,
-            'created_at': data.created_at,
-            'favorite_count': data.favorite_count,
-            'full_text': data.full_text,
-            'id_str': data.id_str,
-            'image_url': data.image_url,
-            'in_reply_to_screen_name': data.in_reply_to_screen_name,
-            'lang': data.lang,
-            'location': data.location,
-            'quote_count': data.quote_count,
-            'reply_count': data.reply_count,
-            'retweet_count': data.retweet_count,
-            'tweet_url': data.tweet_url,
-            'user_id_str': data.user_id_str,
-            'username': data.username,
-            'categories': data.categories
-        }
-        data_list.append(data_dict)
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT * FROM DatasetTrainingData"))
+        data_list = []
+        for row in result:
+            data_dict = {
+                'id': row[0],
+                'conversation_id_str': row[1],
+                'created_at': row[2],
+                'favorite_count': row[3],
+                'full_text': row[4],
+                'id_str': row[5],
+                'image_url': row[6],
+                'in_reply_to_screen_name': row[7],
+                'lang': row[8],
+                'location': row[9],
+                'quote_count': row[10],
+                'reply_count': row[11],
+                'retweet_count': row[12],
+                'tweet_url': row[13],
+                'user_id_str': row[14],
+                'username': row[15],
+                'categories': row[16]
+            }
+            data_list.append(data_dict)
     return data_list
 
 def call_labeleddata_obj():
-    all_data = LabeledPalestinaData.query.all()
-    data_list = []
-    for data in all_data:
-        data_dict = {
-            'id': data.id,
-            'conversation_id_str': data.conversation_id_str,
-            'created_at': data.created_at,
-            'favorite_count': data.favorite_count,
-            'full_text': data.full_text,
-            'id_str': data.id_str,
-            'image_url': data.image_url,
-            'in_reply_to_screen_name': data.in_reply_to_screen_name,
-            'lang': data.lang,
-            'location': data.location,
-            'quote_count': data.quote_count,
-            'reply_count': data.reply_count,
-            'retweet_count': data.retweet_count,
-            'tweet_url': data.tweet_url,
-            'user_id_str': data.user_id_str,
-            'username': data.username,
-            'category': data.category
-        }
-        data_list.append(data_dict)
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT * FROM LabeledDataTesting"))
+        data_list = []
+        for row in result:
+            data_dict = {
+                'id': row[0],
+                'conversation_id_str': row[1],
+                'created_at': row[2],
+                'favorite_count': row[3],
+                'full_text': row[4],
+                'id_str': row[5],
+                'image_url': row[6],
+                'in_reply_to_screen_name': row[7],
+                'lang': row[8],
+                'location': row[9],
+                'quote_count': row[10],
+                'reply_count': row[11],
+                'retweet_count': row[12],
+                'tweet_url': row[13],
+                'user_id_str': row[14],
+                'username': row[15],
+                'category': row[16]
+            }
+            data_list.append(data_dict)
     return data_list

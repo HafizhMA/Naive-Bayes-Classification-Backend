@@ -5,13 +5,14 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'user' 
     id = db.Column(db.Integer, primary_key=True)
-    nama = db.Column(db.String(100), nullable=False)
+    nama = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
 
     def __repr__(self):
         return '<User %r>' % self.nama
     
-class Palestina(db.Model):
-    __tablename__ = 'palestina'
+class Dataset(db.Model):
+    __tablename__ = 'dataset'
     id = db.Column(db.Integer, primary_key=True)
     conversation_id_str = db.Column(db.String(50))
     created_at = db.Column(db.String(100))
@@ -30,10 +31,10 @@ class Palestina(db.Model):
     username = db.Column(db.String(100))
 
     def __repr__(self):
-        return '<Palestina %r>' % self.full_text
+        return '<Dataset %r>' % self.full_text
 
-class PalestinaCleaned(db.Model):
-    __tablename__ = 'palestinacleaned'
+class DatasetCleaned(db.Model):
+    __tablename__ = 'datasetcleaned'
     id = db.Column(db.Integer, primary_key=True)
     conversation_id_str = db.Column(db.String(50))
     created_at = db.Column(db.String(100))
@@ -52,10 +53,10 @@ class PalestinaCleaned(db.Model):
     username = db.Column(db.String(100))
 
     def __repr__(self):
-        return '<Palestinacleaned %r>' % self.full_text
+        return '<DatasetCleaned %r>' % self.full_text
     
-class PalestinaTrainingData(db.Model):
-    __tablename__ = 'palestinatrainingdata'
+class DatasetTrainingData(db.Model):
+    __tablename__ = 'datasettrainingdata'
     id = db.Column(db.Integer, primary_key=True)
     conversation_id_str = db.Column(db.String(50))
     created_at = db.Column(db.String(100))
@@ -75,10 +76,10 @@ class PalestinaTrainingData(db.Model):
     categories = db.Column(db.String(100))
 
     def __repr__(self):
-        return '<PalestinaTrainingData %r>' % self.full_text
+        return '<DatasetTrainingData %r>' % self.full_text
     
-class LabeledPalestinaData(db.Model):
-    __tablename__ = 'labeledpalestinadata'
+class LabeledDataTesting(db.Model):
+    __tablename__ = 'labeleddatatesting'
     id = db.Column(db.Integer, primary_key=True)
     conversation_id_str = db.Column(db.String(50))
     created_at = db.Column(db.String(100))
@@ -98,4 +99,4 @@ class LabeledPalestinaData(db.Model):
     category = db.Column(db.String(100))
 
     def __repr__(self):
-        return '<labeledpalestinadata %r>' % self.full_text
+        return '<labeledDataTesting %r>' % self.full_text
