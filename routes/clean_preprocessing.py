@@ -1,17 +1,17 @@
 from flask import Blueprint, jsonify
-from function.obj_converter import call_palestinacleaned_obj, call_palestina_obj
+from function.obj_converter import call_DatasetCleaned_obj, call_dataset_obj
 from function.text_cleaner import clear_twitter_text
 from function.normalisasi import normalize_text, norm
 from function.stopwords import stopword
 from function.stemming import stemming
-from models.model import db, PalestinaCleaned
+from models.model import db, DatasetCleaned
 
 clean_preprocessing = Blueprint('clean_preprocessing', __name__, template_folder='routes')
 
 @clean_preprocessing.route("/preprocessing-normalisasi")
 def preprocessingNormalisasi():
     # Get data dari function.obj_converter.py
-    data_list = call_palestina_obj()
+    data_list = call_dataset_obj()
 
     # Clean 'full_text' 
     for data in data_list:
@@ -23,7 +23,7 @@ def preprocessingNormalisasi():
 @clean_preprocessing.route("/preprocessing-stopwords")
 def preprocessingStopwords():
     # Get data dari function.obj_converter.py
-    data_list = call_palestina_obj()
+    data_list = call_dataset_obj()
 
     # Clean 'full_text' 
     for data in data_list:
@@ -36,7 +36,7 @@ def preprocessingStopwords():
 @clean_preprocessing.route("/preprocessing-tokenized")
 def preprocessingTokenized():
     # Get data dari function.obj_converter.py
-    data_list = call_palestina_obj()
+    data_list = call_dataset_obj()
 
     # Clean 'full_text' 
     for data in data_list:
@@ -51,8 +51,8 @@ def preprocessingTokenized():
 @clean_preprocessing.route("/preprocessing-stemming-table")
 def preprocessingStemmingTable():
     db.create_all()
-    # Assuming call_palestina_obj() fetches data as a list of dictionaries
-    data_list = call_palestina_obj()
+    # Assuming call_dataset_obj() fetches data as a list of dictionaries
+    data_list = call_dataset_obj()
 
     # Clean 'full_text' 
     for data in data_list:
@@ -63,7 +63,7 @@ def preprocessingStemmingTable():
         data['full_text'] = data['full_text'].split()
         data['full_text'] = stemming(data['full_text'])
 
-        new_entry = PalestinaCleaned(conversation_id_str=data['conversation_id_str'],
+        new_entry = DatasetCleaned(conversation_id_str=data['conversation_id_str'],
                               created_at=data['created_at'],
                               favorite_count=data['favorite_count'],
                               full_text=data['full_text'],
@@ -80,9 +80,9 @@ def preprocessingStemmingTable():
                               username=data['username'])
         db.session.add(new_entry)
     db.session.commit()
-    return "Tabel Palestinacleaned berhasil dibuat dan diisi dengan data."
+    return "Tabel Dataset berhasil dibersihkan dan diisi dengan data."
 
 @clean_preprocessing.route("/get-datatesting")
 def preprocessingStemming():
-    data = call_palestinacleaned_obj()
+    data = call_DatasetCleaned_obj()
     return jsonify(data)

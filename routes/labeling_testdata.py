@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify
 from collections import Counter
-from function.obj_converter import call_palestinacleaned_obj, call_trainingdata_obj, call_labeleddata_obj
+from function.obj_converter import call_DatasetCleaned_obj, call_trainingdata_obj, call_labeleddata_obj
 import pandas as pd
-from models.model import db, LabeledPalestinaData
+from models.model import db, LabeledDataTesting
 
 
 testdata_labeled = Blueprint('testdata_labeled', __name__, template_folder='routes')
@@ -14,7 +14,7 @@ def labeling_testdata():
 
     # Load data
     train_data = call_trainingdata_obj()
-    test_data = call_palestinacleaned_obj()
+    test_data = call_DatasetCleaned_obj()
 
     # Convert train_data and test_data to DataFrames
     train_df = pd.DataFrame(train_data)
@@ -55,7 +55,7 @@ def labeling_testdata():
 
     # Save labeled data into the database
     for i, data in enumerate(test_data):
-        new_entry = LabeledPalestinaData(
+        new_entry = LabeledDataTesting(
             conversation_id_str=data['conversation_id_str'],
             created_at=data['created_at'],
             favorite_count=data['favorite_count'],
@@ -76,7 +76,7 @@ def labeling_testdata():
         db.session.add(new_entry)
 
     db.session.commit()
-    return "The labeled Palestine data table has been successfully created and populated."
+    return "The labeled data testing table has been successfully created and populated."
 
 @testdata_labeled.route("/get-labeled-testdata")
 def get_labeled_testdata():

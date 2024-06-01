@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 from models.model import db
 from routes.testing_routes import testing
-from routes.create_palestinatable import create_table_palestina
+from routes.create_dataset import create_dataset
 from routes.clean_regex import clean_text_regex
 from routes.clean_preprocessing import clean_preprocessing
 from routes.traindata_categorized import traindata
@@ -26,7 +26,7 @@ app.register_blueprint(testing)
 
 
 # tabel pertama
-app.register_blueprint(create_table_palestina)
+app.register_blueprint(create_dataset)
 
 
 # clean using regex

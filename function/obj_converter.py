@@ -4,9 +4,9 @@ import os
 # Get database URI from environment variable
 engine = create_engine(os.getenv("DATABASE_URI"))
 
-def call_palestina_obj():
+def call_dataset_obj():
     with engine.connect() as connection:
-        result = connection.execute(text("SELECT * FROM Palestina"))
+        result = connection.execute(text("SELECT * FROM Dataset"))
         data_list = []
         for row in result:
             data_dict = {
@@ -30,9 +30,9 @@ def call_palestina_obj():
             data_list.append(data_dict)
     return data_list
 
-def call_palestinacleaned_obj():
+def call_DatasetCleaned_obj():
     with engine.connect() as connection:
-        result = connection.execute(text("SELECT * FROM PalestinaCleaned"))
+        result = connection.execute(text("SELECT * FROM DatasetCleaned"))
         data_list = []
         for row in result:
             data_dict = {
@@ -58,7 +58,7 @@ def call_palestinacleaned_obj():
 
 def call_trainingdata_obj():
     with engine.connect() as connection:
-        result = connection.execute(text("SELECT * FROM PalestinaTrainingData"))
+        result = connection.execute(text("SELECT * FROM DatasetTrainingData"))
         data_list = []
         for row in result:
             data_dict = {
@@ -85,7 +85,7 @@ def call_trainingdata_obj():
 
 def call_labeleddata_obj():
     with engine.connect() as connection:
-        result = connection.execute(text("SELECT * FROM LabeledPalestinaData"))
+        result = connection.execute(text("SELECT * FROM LabeledDataTesting"))
         data_list = []
         for row in result:
             data_dict = {

@@ -1,32 +1,31 @@
 import pandas as pd
 
-lexicon_df = pd.read_csv('dataset/Indonesian-NRC-EmoLex.txt', delimiter='\t')
-# Fungsi untuk mengkategorikan teks
+# Lexicon bencana, dapat diperluas sesuai kebutuhan
+disaster_lexicon = {
+    'banjir': ['banjir', 'genangan', 'hujan deras', 'meluap'],
+    'longsor': ['longsor', 'tanah longsor', 'erosi', 'lereng'],
+    'gempa': ['gempa', 'seismik', 'tsunami', 'getaran'],
+    'kebakaran': ['kebakaran', 'api', 'terbakar', 'kobaran'],
+    'gunung meletus': ['meletus', 'lava', 'vulkanik', 'abu vulkanik'],
+}
+
+# Fungsi untuk mengkategorikan teks berdasarkan bencana
 def categorize_text(text):
     # Inisialisasi kategori
-    categories = {
-        'anger': 0,
-        'anticipation': 0,
-        'disgust': 0,
-        'fear': 0,
-        'joy': 0,
-        'negative': 0,
-        'positive': 0,
-        'sadness': 0,
-        'surprise': 0,
-        'trust': 0
-    }
+    categories = {key: 0 for key in disaster_lexicon.keys()}
 
     # Loop melalui setiap kata dalam teks
     for word in text.split():
-        # Cari kata dalam lexicon
-        match = lexicon_df[lexicon_df['Indonesian Word'] == word.lower()]
-        if not match.empty:
-            # Update kategori sesuai dengan lexicon
-            for col in categories.keys():
-                categories[col] += match[col].values[0]
+        for disaster, keywords in disaster_lexicon.items():
+            if word.lower() in keywords:
+                categories[disaster] += 1
 
-    # Ambil kategori yang memiliki nilai maksimum
-    max_category = max(categories, key=categories.get)
+    # Ambil semua kategori yang memiliki nilai di atas 0
+    relevant_categories = [category for category, count in categories.items() if count > 0]
 
-    return max_category
+    return relevant_categories
+
+# Contoh penggunaan
+text = "Terjadi banjir dan longsor di daerah tersebut setelah hujan deras semalaman."
+categories = categorize_text(text)
+print(f"Teks tersebut dikategorikan sebagai: {categories}")
