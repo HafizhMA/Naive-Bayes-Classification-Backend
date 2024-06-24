@@ -26,6 +26,8 @@ def categorize_text(text):
     return relevant_categories
 
 # Contoh penggunaan
+'''
 text = "Terjadi banjir dan longsor di daerah tersebut setelah hujan deras semalaman."
 categories = categorize_text(text)
 print(f"Teks tersebut dikategorikan sebagai: {categories}")
+'''
