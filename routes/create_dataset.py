@@ -1,16 +1,33 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 import pandas as pd
 from function.obj_converter import call_dataset_obj
 from main import db
 from models.model import Dataset
+import os
 
 create_dataset = Blueprint('create_dataset', __name__, template_folder='routes')
+
+UPLOAD_FOLDER = 'dataset'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+@create_dataset.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return {'error': 'No file part'}, 400
+    file = request.files['file']
+    if file.filename == '':
+        return {'error': 'No selected file'}, 400
+    if file:
+        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(filepath)
+        return {'message': 'File successfully uploaded', 'filename': file.filename}, 200
 
 # Create tabel pertama
 @create_dataset.route("/create-dataset-table")
 def create_dataset_table():
     db.create_all()
-    df = pd.read_csv('./dataset/bencana-alam.csv').drop_duplicates(subset=['full_text']).dropna(subset=['full_text'])
+    df = pd.read_csv('./dataset/bencana-news.csv').drop_duplicates(subset=['full_text']).dropna(subset=['full_text'])
     df = df.where(pd.notnull(df), None)
     for index, row in df.iterrows():
         new_entry = Dataset(conversation_id_str=row['conversation_id_str'],
@@ -27,7 +44,11 @@ def create_dataset_table():
                               retweet_count=row['retweet_count'],
                               tweet_url=row['tweet_url'],
                               user_id_str=row['user_id_str'],
-                              username=row['username'])
+                              username=row['username'],
+                              category=row['category'],
+                              relevansi=row['relevansi'],
+                              tipe_akun=row['tipe_akun'],
+                              )
         db.session.add(new_entry)
     db.session.commit()
     return "Tabel dataset berhasil dibuat dan diisi dengan data."

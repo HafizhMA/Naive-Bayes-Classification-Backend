@@ -29,6 +29,9 @@ class Dataset(db.Model):
     tweet_url = db.Column(db.String(200))
     user_id_str = db.Column(db.String(50))
     username = db.Column(db.String(100))
+    category = db.Column(db.String(100))  
+    relevansi = db.Column(db.String(100))  
+    tipe_akun = db.Column(db.String(100))
 
     def __repr__(self):
         return '<Dataset %r>' % self.full_text
@@ -51,6 +54,9 @@ class DatasetCleaned(db.Model):
     tweet_url = db.Column(db.String(200))
     user_id_str = db.Column(db.String(50))
     username = db.Column(db.String(100))
+    category = db.Column(db.String(100))  
+    relevansi = db.Column(db.String(100))  
+    tipe_akun = db.Column(db.String(100))
 
     def __repr__(self):
         return '<DatasetCleaned %r>' % self.full_text

@@ -77,7 +77,10 @@ def preprocessingStemmingTable():
                               retweet_count=data['retweet_count'],
                               tweet_url=data['tweet_url'],
                               user_id_str=data['user_id_str'],
-                              username=data['username'])
+                              username=data['username'],
+                              category=data['category'],
+                              relevansi=data['relevansi'],
+                              tipe_akun=data['tipe_akun'],)
         db.session.add(new_entry)
     db.session.commit()
     return "Tabel Dataset berhasil dibersihkan dan diisi dengan data."

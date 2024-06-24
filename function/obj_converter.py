@@ -25,7 +25,10 @@ def call_dataset_obj():
                 'retweet_count': row[12],
                 'tweet_url': row[13],
                 'user_id_str': row[14],
-                'username': row[15]
+                'username': row[15],
+                'category': row[16],
+                'relevansi': row[17],
+                'tipe_akun': row[18]
             }
             data_list.append(data_dict)
     return data_list
@@ -51,7 +54,10 @@ def call_DatasetCleaned_obj():
                 'retweet_count': row[12],
                 'tweet_url': row[13],
                 'user_id_str': row[14],
-                'username': row[15]
+                'username': row[15],
+                'category': row[16],
+                'relevansi': row[17],
+                'tipe_akun': row[18]
             }
             data_list.append(data_dict)
     return data_list
