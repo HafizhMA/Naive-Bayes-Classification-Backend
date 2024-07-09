@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from collections import Counter
 from function.obj_converter import call_DatasetCleaned_obj, call_trainingdata_obj, call_testingdata_obj, call_labeleddata_obj
 import pandas as pd
 from models.model import db, LabeledDataTesting, Testing, Training
+import random
 
 
 testdata_labeled = Blueprint('testdata_labeled', __name__, template_folder='routes')
@@ -185,17 +186,23 @@ def get_relevance_labeleddata():
 
 @testdata_labeled.route('/split-data')
 def split_data():
-    # Load your dataset, split it into train_df and test_df here
+    # Load your dataset
     sql_df = call_DatasetCleaned_obj()
     df = pd.DataFrame(sql_df)
+    
+    # Shuffle the dataframe randomly
+    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+
+    # Calculate the number of rows for training and testing
     total_rows = len(df)
     train_rows = int(0.8 * total_rows)
     test_rows = total_rows - train_rows
 
+    # Split data into train_df and test_df
     train_df = df.iloc[:train_rows]
-    test_df = df.iloc[train_rows:train_rows + test_rows]
+    test_df = df.iloc[train_rows:total_rows]
 
-    # Create tables if they do not exist
+    # Create tables if they do not exist (if using SQLAlchemy)
     db.create_all()
 
     # Save train_df and test_df to SQL
@@ -206,6 +213,7 @@ def split_data():
 
 def save_to_sql(df, model):
     for index, row in df.iterrows():
+        # Adjust the following mapping based on your actual column names in df
         new_entry = model(
             conversation_id_str=row['conversation_id_str'],
             created_at=row['created_at'],
@@ -228,3 +236,86 @@ def save_to_sql(df, model):
         )
         db.session.add(new_entry)
     db.session.commit()
+
+@testdata_labeled.route('/update-labeled-data', methods=['POST'])
+def update_labeled_data():
+    data = request.get_json()
+    tweet_id = data.get('id')
+    new_category = data.get('category')
+
+    tweet = LabeledDataTesting.query.get(tweet_id)
+    if tweet:
+        tweet.category = new_category
+        db.session.commit()
+        return jsonify({'message': 'Data updated successfully'}), 200
+    else:
+        return jsonify({'message': 'Tweet not found'}), 404
+    
+@testdata_labeled.route('/hitung_metrics', methods=['GET'])
+def hitung_metrics():
+    # Query untuk mendapatkan data prediksi
+    predictions = LabeledDataTesting.query.all()
+
+    # Inisialisasi variabel untuk metrik
+    TP = 0  # True Positives
+    FP = 0  # False Positives
+    FN = 0  # False Negatives
+    TN = 0  # True Negatives
+
+    # Mengisi variabel metrik
+    for pred in predictions:
+        true_category = pred.category
+        predicted_category = pred.category_naive_bayes
+        if true_category == predicted_category:
+            TP += 1
+        elif true_category != predicted_category:
+            FP += 1
+        elif predicted_category == true_category:
+            FN += 1
+        else:
+            TN += 1
+
+    # Menghitung metrik
+    accuracy = (TP + TN) / (TP + FP + FN + TN) if (TP + FP + FN + TN) > 0 else 0
+    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+    f1_score = (2 * recall * precision) / (recall + precision) if (recall + precision) > 0 else 0
+
+    # Format output sebagai JSON
+    result = [{
+        'accuracy': accuracy,
+        'precision': precision,
+        'recall': recall,
+        'f1_score': f1_score,
+    }]
+
+    return jsonify(result)
+
+@testdata_labeled.route('/hitung_accuracy', methods=['GET'])
+def hitung_accuracy():
+    # Query untuk mendapatkan data prediksi
+    predictions = LabeledDataTesting.query.all()
+
+    # Inisialisasi variabel untuk metrik
+    TP = 0  # True Positives
+    FP = 0  # False Positives
+
+    # Mengisi variabel metrik
+    for pred in predictions:
+        true_category = pred.category
+        predicted_category = pred.category_naive_bayes
+        if true_category == predicted_category:
+            TP += 1
+        else:
+            FP += 1
+
+    # Menghitung akurasi
+    total_data = len(predictions)
+    accuracy = TP / total_data if total_data > 0 else 0
+
+    # Format output sebagai JSON
+    result = [{
+        'accuracy': accuracy * 100,
+    }]
+
+    return jsonify(result)
