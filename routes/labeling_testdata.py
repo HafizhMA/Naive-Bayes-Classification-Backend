@@ -250,46 +250,62 @@ def update_labeled_data():
         return jsonify({'message': 'Data updated successfully'}), 200
     else:
         return jsonify({'message': 'Tweet not found'}), 404
-    
+
 @testdata_labeled.route('/hitung_metrics', methods=['GET'])
 def hitung_metrics():
     # Query untuk mendapatkan data prediksi
-    predictions = LabeledDataTesting.query.all()
+    predictions = call_labeleddata_obj()
 
-    # Inisialisasi variabel untuk metrik
-    TP = 0  # True Positives
-    FP = 0  # False Positives
-    FN = 0  # False Negatives
-    TN = 0  # True Negatives
+    # Inisialisasi confusion matrix
+    confusion_matrix = {
+        'netral': {'netral': 0, 'banjir lahar dingin': 0, 'banjir': 0},
+        'banjir lahar dingin': {'netral': 0, 'banjir lahar dingin': 0, 'banjir': 0},
+        'banjir': {'netral': 0, 'banjir lahar dingin': 0, 'banjir': 0}
+    }
 
-    # Mengisi variabel metrik
+    # Mengisi confusion matrix
     for pred in predictions:
         true_category = pred.category
         predicted_category = pred.category_naive_bayes
-        if true_category == predicted_category:
-            TP += 1
-        elif true_category != predicted_category:
-            FP += 1
-        elif predicted_category == true_category:
-            FN += 1
-        else:
-            TN += 1
+        confusion_matrix[true_category][predicted_category] += 1
 
-    # Menghitung metrik
-    accuracy = (TP + TN) / (TP + FP + FN + TN) if (TP + FP + FN + TN) > 0 else 0
-    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
-    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
-    f1_score = (2 * recall * precision) / (recall + precision) if (recall + precision) > 0 else 0
+    # Menghitung metrik untuk setiap kategori
+    metrics = {}
+    for category in confusion_matrix.keys():
+        TP = confusion_matrix[category][category]
+        FP = sum(confusion_matrix[other_category][category] for other_category in confusion_matrix if other_category != category)
+        FN = sum(confusion_matrix[category][other_category] for other_category in confusion_matrix[category] if other_category != category)
+        TN = sum(confusion_matrix[other_category][other_category_2] 
+                 for other_category in confusion_matrix 
+                 for other_category_2 in confusion_matrix[other_category] 
+                 if other_category != category and other_category_2 != category)
 
-    # Format output sebagai JSON
-    result = [{
-        'accuracy': accuracy,
-        'precision': precision,
-        'recall': recall,
-        'f1_score': f1_score,
-    }]
+        accuracy = (TP + TN) / (TP + FP + FN + TN) if (TP + FP + FN + TN) > 0 else 0
+        precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+        recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+        f1_score = (2 * recall * precision) / (recall + precision) if (recall + precision) > 0 else 0
 
-    return jsonify(result)
+        # Mengubah metrik menjadi persentase
+        accuracy *= 100
+        precision *= 100
+        recall *= 100
+        f1_score *= 100
+
+        metrics[category] = [{
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1_score': f1_score,
+            'TP': TP,
+            'FP': FP,
+            'FN': FN,
+            'TN': TN
+        }]
+
+    return jsonify(metrics)
+
+
+
 
 @testdata_labeled.route('/hitung_accuracy', methods=['GET'])
 def hitung_accuracy():
