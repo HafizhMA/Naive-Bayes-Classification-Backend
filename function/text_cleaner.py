@@ -13,6 +13,6 @@ def clear_twitter_text(text):
     text = re.sub(r'www\S+', '', text)
 
     # Remove special characters
-    text = re.sub(r'[^A-Za-z0-9 ]', '', text)
+    text = re.sub(r'[^A-Za-z0-9 ]', ' ', text)
 
     return text

@@ -4,6 +4,7 @@ from function.obj_converter import call_dataset_obj
 from main import db
 from models.model import Dataset
 import os
+from collections import Counter
 
 create_dataset = Blueprint('create_dataset', __name__, template_folder='routes')
 
@@ -58,4 +59,32 @@ def create_dataset_table():
 @create_dataset.route('/get-dataset')
 def get_dataset():
     data = call_dataset_obj()
-    return jsonify(data)
+    kategori_column = [row['category'] for row in data]
+    relevansi_column = [row['relevansi'] for row in data]
+    tipeakun_column = [row['tipe_akun'] for row in data]
+
+    # Hitung frekuensi setiap kategori
+    kategori_counter = Counter(kategori_column)
+    relevansi_counter = Counter(relevansi_column)
+    tipeakun_counter = Counter(tipeakun_column)
+
+    # Ubah hasil ke format yang bisa dijadikan JSON
+    kategori_json = [{"kategori": kategori, "jumlah": jumlah} for kategori, jumlah in kategori_counter.items()]
+    relevansi_json = [{"relevansi": relevansi, "jumlah_relevansi": jumlah_relevansi} for relevansi, jumlah_relevansi in relevansi_counter.items()]
+    tipeakun_json = [{"tipeakun": tipeakun, "jumlah_tipeakun": jumlah_tipeakun} for tipeakun, jumlah_tipeakun in tipeakun_counter.items()]
+
+    # Membuat dictionary yang berisi data asli, kategori_json, relevansi_json, tipeakun_json, dan persentase perbedaan
+    total = {
+        "data": data,
+        "category": kategori_json,
+        "relevansi": relevansi_json,
+        "tipeakun": tipeakun_json,
+    }
+
+    return jsonify(total)
+
+@create_dataset.route("/get-csv")
+def get_csv():
+    data = call_dataset_obj()
+    datacsv = pd.DataFrame(data)
+    return datacsv.to_csv('./dataset/bencana-latest.csv', index=False)
