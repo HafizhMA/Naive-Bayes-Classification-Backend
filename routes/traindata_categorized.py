@@ -40,8 +40,8 @@ def get_relevance():
 
     # Hitung persentase relevan dan notrelevan
     if total_tipeakun > 0:
-        persen_media = (jumlah_media / jumlah_individu) * 100
-        persen_individu = (jumlah_individu / jumlah_media) * 100
+        persen_media = (jumlah_media / total_tipeakun) * 100
+        persen_individu = (jumlah_individu / total_tipeakun) * 100
     else:
         persen_media = 0
         persen_individu = 0

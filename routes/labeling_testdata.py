@@ -265,8 +265,8 @@ def hitung_metrics():
 
     # Mengisi confusion matrix
     for pred in predictions:
-        true_category = pred.category
-        predicted_category = pred.category_naive_bayes
+        true_category = pred['category']
+        predicted_category = pred['category_naive_bayes']
         confusion_matrix[true_category][predicted_category] += 1
 
     # Menghitung metrik untuk setiap kategori
